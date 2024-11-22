@@ -4,6 +4,7 @@
         "json",
         "ithings",
         "Throw",
-        "args"
+        "args",
+        "modbus"
     ]
 }

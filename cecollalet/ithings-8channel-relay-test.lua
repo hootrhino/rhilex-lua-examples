@@ -13,18 +13,14 @@
 -- You should have received a copy of the GNU Affero General Public License
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 --------------------------------------------------------
 -- Go https://www.hootrhino.com for more tutorials    --
 --                                                    --
--- ID: %s                                             --
--- NAME = "%s"                                        --
--- DESCRIPTION = "%s"                                 --
+-- ID: CECUDRA92A6                                             --
+-- NAME = "ITHINGS_IOTHUB_CEC:139.159.188.223"                                        --
+-- DESCRIPTION = "ITHINGS_IOTHUB_CEC:139.159.188.223"                                 --
 --------------------------------------------------------
 
---
--- Handle Received Params
---
 local keys = {
     sw1 = true,
     sw2 = true,
@@ -38,10 +34,10 @@ local keys = {
 
 function HandleParams(Params)
     for key, value in pairs(Params) do
-        Debug("[== HandleParams ==] " .. key .. " [== value ==] ", value)
-        if keys.key == true then
+        Debug("[== HandleParams ==] " .. key .. " [== value ==] " .. value)
+        if keys[key] == true then
             if value == 0 then
-                Debug("[== 关闭开关控制指令下发 ==] " .. key .. " [== value ==] ", value)
+                Debug("[== 关闭开关控制指令下发 ==] " .. key .. " [== value ==] " .. value)
                 local err1 = modbus:WritePoint("device-id", {
                     tag = key,
                     value = "0",
@@ -51,7 +47,7 @@ function HandleParams(Params)
                 end
             end
             if value == 1 then
-                Debug("[== 打开开关控制指令下发 ==] " .. key .. " [== value ==] ", value)
+                Debug("[== 打开开关控制指令下发 ==] " .. key .. " [== value ==] " .. value)
                 local err1 = modbus:WritePoint("device-id", {
                     tag = key,
                     value = "1",
@@ -70,7 +66,7 @@ end
 function HandleAction(ActionId, Params)
     Debug("[== HandleAction ==] ActionId=" .. ActionId)
     for key, value in pairs(Params) do
-        Debug("[== HandleAction ==] " .. key .. " [== value ==] ", value)
+        Debug("[== HandleAction ==] " .. key .. " [== value ==] " .. value)
     end
 end
 

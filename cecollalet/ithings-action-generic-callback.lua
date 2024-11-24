@@ -31,7 +31,6 @@ function HandleReportProperties(CecollaId, Token, ProductId, DeviceId, identifie
     local errIothub = ithings:GetPropertyReplySuccess(CecollaId, Token, ProductId, DeviceId, identifiers)
     if errIothub ~= nil then
         Throw("上传属性失败，错误信息:", errIothub)
-        return false, args
     end
 end
 
@@ -70,7 +69,7 @@ function Main(CecollaId, Env)
     local dataT, errJ2T = json:J2T(Env.Payload);
     if errJ2T ~= nil then
         Throw("JSON解析失败, 错误信息:", errJ2T);
-        return false, Env.Payload;
+        return
     end;
     if dataT.method == "control" then
         Debug("[== Cecolla Debug ==] 收到控制指令:", Env.Payload);
@@ -78,7 +77,7 @@ function Main(CecollaId, Env)
         local errIothub = ithings:CtrlReplySuccess(CecollaId, dataT.msgToken);
         if errIothub ~= nil then
             Throw("控制指令失败，错误信息:", errIothub);
-            return false, Env.Payload;
+            return
         end;
     end;
     if dataT.method == "action" then
@@ -87,7 +86,7 @@ function Main(CecollaId, Env)
         local errIothub = ithings:ActionReplySuccess(CecollaId, dataT.msgToken);
         if errIothub ~= nil then
             Throw("行为调用失败，错误信息:", errIothub);
-            return false, Env.Payload;
+            return
         end;
     end;
     if dataT.method == "getReport" then

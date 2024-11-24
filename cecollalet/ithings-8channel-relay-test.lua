@@ -21,6 +21,7 @@
 -- DESCRIPTION = "ITHINGS_IOTHUB_CEC:139.159.188.223"                                 --
 --------------------------------------------------------
 
+-- 继电器开关组
 local keys = {
     sw1 = true,
     sw2 = true,
@@ -31,8 +32,22 @@ local keys = {
     sw7 = true,
     sw8 = true,
 }
+-- 上报属性
+function ReportProperties(CecollaId, identifiers)
+    -- properties: map[k]=value
+    local properties, errGetProperties = ithings:GetProperties(CecollaId, identifiers)
+    if errGetProperties ~= nil then
+        Throw("ithings:GetProperties Error:" .. errGetProperties)
+        return false, args
+    end
+    local errIothub = ithings:PropertyReport(CecollaId, properties)
+    if errIothub ~= nil then
+        Throw("ithings:PropertyReport Error:" .. errIothub)
+        return false, args
+    end
+end
 
-function HandleParams(Params)
+function HandleParams(ProductId, DeviceId, Params)
     for key, value in pairs(Params) do
         Debug("[== HandleParams ==] " .. key .. " [== value ==] " .. value)
         if keys[key] == true then
@@ -63,7 +78,7 @@ end
 --
 -- Handle Received Action
 --
-function HandleAction(ActionId, Params)
+function HandleAction(ActionId, ProductId, DeviceId, Params)
     Debug("[== HandleAction ==] ActionId=" .. ActionId)
     for key, value in pairs(Params) do
         Debug("[== HandleAction ==] " .. key .. " [== value ==] " .. value)
@@ -74,29 +89,38 @@ end
 -- Action Main
 --
 
-function Main(CecollaId, Payload)
-    Debug("[==Debug==] Received Ithings Payload:" .. Payload);
-    local dataT, errJ2T = json:J2T(Payload);
+function Main(CecollaId, Env)
+    Debug("[==Debug==] Received Ithings Env.Payload:" .. Env.Payload);
+    local dataT, errJ2T = json:J2T(Env.Payload);
     if errJ2T ~= nil then
         Throw("json:J2T error:" .. errJ2T);
-        return false, Payload;
+        return false, Env.Payload;
     end;
     if dataT.method == "control" then
-        Debug("[==Debug==] Ithings Send Control:" .. Payload);
+        Debug("[==Debug==] Ithings Send Control:" .. Env.Payload);
         HandleParams(dataT.params)
         local errIothub = ithings:CtrlReplySuccess(CecollaId, dataT.msgToken);
         if errIothub ~= nil then
             Throw("ithings:CtrlReplySuccess Error:" .. errIothub);
-            return false, Payload;
+            return false, Env.Payload;
         end;
     end;
     if dataT.method == "action" then
-        Debug("[==Debug==] Ithings Send Action:" .. Payload);
+        Debug("[==Debug==] Ithings Send Action:" .. Env.Payload);
         HandleAction(dataT.actionID, dataT.params)
         local errIothub = ithings:ActionReplySuccess(CecollaId, dataT.msgToken);
         if errIothub ~= nil then
             Throw("ithings:ActionReplySuccess Error:" .. errIothub);
-            return false, Payload;
+            return false, Env.Payload;
+        end;
+    end;
+    if dataT.method == "getReport" then
+        Debug("[==Debug==] Ithings Send getReport:" .. Env.Payload);
+        ReportProperties(CecollaId, dataT.identifiers)
+        local errIothub = ithings:ActionReplySuccess(CecollaId, dataT.msgToken);
+        if errIothub ~= nil then
+            Throw("ithings:ActionReplySuccess Error:" .. errIothub);
+            return false, Env.Payload;
         end;
     end;
 end

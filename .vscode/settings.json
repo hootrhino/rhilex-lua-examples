@@ -5,6 +5,7 @@
         "ithings",
         "Throw",
         "args",
-        "modbus"
+        "modbus",
+        "device"
     ]
 }
